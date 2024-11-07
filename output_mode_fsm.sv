@@ -3,14 +3,12 @@ module output_mode_fsm (
     input  logic reset,
     input  logic [1:0] mode_select,  // Two-bit input for mode selection
     output logic pwm_enable,
-    output logic r2r_enable,
-    output logic buzzer_enable
+    output logic r2r_enable
 );
     typedef enum logic [1:0] {
         OFF_MODE = 2'b00,
         PWM_MODE = 2'b01,
-        R2R_MODE = 2'b10,
-        BUZZER_MODE = 2'b11
+        R2R_MODE = 2'b10
     } statetype;
 
     statetype current_state, next_state;
@@ -32,12 +30,11 @@ module output_mode_fsm (
     always_comb begin
         pwm_enable = 0;
         r2r_enable = 0;
-        buzzer_enable = 0;
         case (current_state)
             PWM_MODE:    pwm_enable = 1;
             R2R_MODE:    r2r_enable = 1;
-            BUZZER_MODE: buzzer_enable = 1;
             OFF_MODE:    ; // All outputs remain 0
+            default:    ;
         endcase
     end
 endmodule
