@@ -21,7 +21,7 @@ module lab_6_top_level (
     output logic   CA, CB, CC, CD, CE, CF, CG, DP,
     output logic   AN1, AN2, AN3, AN4,
     output logic [15:0] led,
-    output logic   pwm_out,buzzer_out,
+    output logic   pwm_out,
     output logic [7:0] R2R_out
 );
     // Internal signal declarations
@@ -139,21 +139,11 @@ module lab_6_top_level (
         .R2R_out(R2R_out_internal)  // Connect to R2R ladder header, can leave empty if 
     );                              // not required, i.e. .R2R_out()
 
-    buzzer_pwm #(
-        .CLOCK_FREQ(100_000_000), // System clock frequency in Hz
-        .BUZZER_FREQ(1000)        // Desired buzzer frequency in Hz
-    ) buzzer_inst (
-        .clk(clk),
-        .reset(reset),
-        .enable(buzzer_enable),
-        .pwm_out(buzzer_out_internal) // Connect this to the buzzer output pin
-    );
 
     // Output multiplexing based on FSM state
     always_comb begin
         pwm_out = pwm_enable ? pwm_out_internal : 0;
         R2R_out = r2r_enable ? R2R_out_internal : '0;
-        buzzer_out = buzzer_enable ? buzzer_out_internal : 0;
     end
     
 endmodule
