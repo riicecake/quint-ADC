@@ -77,10 +77,12 @@ module adc_combined #(
             scaled_adc_data_pipe <= 0;
         end
         else if (ready_pulse) begin
-            scaled_adc_data_temp <= ave_data * SCALING_FACTOR;      // Multiply by scaling factor
-            scaled_adc_data <= scaled_adc_data_temp >> SHIFT_FACTOR; // Shift for final scaling
-            scaled_adc_data      <= scaled_adc_data_pipe;
+            scaled_adc_data_temp <= ave_data * SCALING_FACTOR;            // Use a wider temp register to avoid 32-bit overflow error
+            scaled_adc_data_pipe <= scaled_adc_data_temp >> SHIFT_FACTOR; // Shift right by 19 after the multiplication
+            scaled_adc_data      <= scaled_adc_data_pipe; ;
         end
     end
 
 endmodule
+
+
