@@ -44,7 +44,7 @@ module lab_6_top_level (
 	);
 	
     logic [3:0] decimal_pt, decimal_ptP, decimal_pt1;
-    mux4_16_bits MUX_DISPLAY (
+    mux3_16_bits MUX_DISPLAY (
     	.in0(mux_outX), // hexadecimal, scaled and averaged
     	.in1(mux_outP),   	// decimal, scaled and averaged
     	.in2(),  	// raw 12-bit ADC hexadecimal
@@ -53,7 +53,7 @@ module lab_6_top_level (
     	.mux_out(mux_out)
 	);
     
-    mux4_16_bits MUX_DECIMAL (
+    mux3_16_bits MUX_DECIMAL (
     	.in0(decimal_pt1), // hexadecimal, scaled and averaged
     	.in1(decimal_ptP),   	// decimal, scaled and averaged
     	.in2(),  	// raw 12-bit ADC hexadecimal
