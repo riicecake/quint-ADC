@@ -1,22 +1,11 @@
-/*
-This design uses the XADC from the IP Catalog. The specific channel is XADC4.
-The Auxiliary Analog Inputs are VAUXP[15] and VAUXN[15].
-These map to the FPGA pins of N2 and N1, respecitively (also in .XDC).
-These map to the JXADC PMOD and the specific PMOD inputs are
-JXADC4:N2 and JXAC10:N1, respectively. These pin are right beside the PMOD GND
-on JXAC11:GND and JXAC5:GND.
-
-The ADC is set to single-ended, continuous sampling, 1 MSps, 256 averaging. 
-Additional averaging is done using the averager module below.
-
-*/
 module lab_6_top_level (
 	input  logic   clk,
 	input  logic   reset,
-	input  logic [1:0] bin_bcd_select,
-	input  logic [1:0] mode_select,
+	input  logic [1:0] select,
+	input  logic [1:0] mux_display_select,
 	input      	vauxp15, // Analog input (positive)
 	input      	vauxn15, // Analog input (negative)
+	input       pwm_V_out,
 	output logic   CA, CB, CC, CD, CE, CF, CG, DP,
 	output logic   AN1, AN2, AN3, AN4,
 	output logic [15:0] led,
@@ -25,19 +14,13 @@ module lab_6_top_level (
 );
 	// Internal signal declarations
 	logic [15:0] ave_data, data, scaled_adc_data; // Combined module outputs
-	logic [15:0] bcd_value, mux_out;
-	logic pwm_enable, r2r_enable;
-	logic pwm_out_internal;
+	logic [7:0] ave_dataP, dataP, scaled_adc_dataP;
+	logic [15:0] bcd_value, mux_out, mux_outP, mux_outX;
+	logic pwm_enable, r2r_enable, xadc_enable;
+	logic pwm_out_internal, pwm_V_out_internal;
 	logic [7:0] R2R_out_internal;
     
-	// Instantiate the FSM
-	output_mode_fsm FSM (
-    	.clk(clk),
-    	.reset(reset),
-    	.mode_select(mode_select),
-    	.pwm_enable(pwm_enable),
-    	.r2r_enable(r2r_enable)
-	);
+
     
 	// Combined ADC and processing module instance
 	adc_combined ADC_COMBINED (
@@ -59,16 +42,46 @@ module lab_6_top_level (
     	.bin_in( scaled_adc_data),
     	.bcd_out(bcd_value)
 	);
+	
+    logic [3:0] decimal_pt, decimal_ptP, decimal_pt1;
+    mux4_16_bits MUX_DISPLAY (
+    	.in0(mux_outX), // hexadecimal, scaled and averaged
+    	.in1(mux_outP),   	// decimal, scaled and averaged
+    	.in2(),  	// raw 12-bit ADC hexadecimal
+    	
+    	.select(mux_display_select),
+    	.mux_out(mux_out)
+	);
     
-	logic [3:0] decimal_pt;
-	mux4_16_bits MUX4 (
-    	.in0(scaled_adc_data), // hexadecimal, scaled and averaged
-    	.in1(bcd_value),   	// decimal, scaled and averaged
-    	.in2(data[15:4]),  	// raw 12-bit ADC hexadecimal
-    	.in3(ave_data),    	// averaged and before scaling 16-bit ADC (extra 4-bits from averaging) hexadecimal
-    	.select(bin_bcd_select),
-    	.mux_out(mux_out),
-    	.decimal_point(decimal_pt)
+    mux4_16_bits MUX_DECIMAL (
+    	.in0(decimal_pt1), // hexadecimal, scaled and averaged
+    	.in1(decimal_ptP),   	// decimal, scaled and averaged
+    	.in2(),  	// raw 12-bit ADC hexadecimal
+    	
+    	.select(mux_display_select),
+    	.mux_out(decimal_pt)
+	);
+	
+	mux4_16_bitsX MUX_X (
+    	.in0(data[15:4]), // hexadecimal, scaled and averaged
+    	.in1(ave_data),   	// decimal, scaled and averaged
+    	.in2(scaled_adc_data),  	// raw 12-bit ADC hexadecimal
+    	.in3(bcd_value),   	// averaged and before scaling 16-bit ADC (extra 4-bits from averaging) hexadecimal
+    	.select(select),
+    	.mux_out(mux_outX),
+    	.decimal_point(decimal_pt1)
+    	
+	);
+	
+	
+	mux4_8_bitsP MUX_P (
+    	.in0(dataP), // hexadecimal, scaled and averaged
+    	.in1(ave_dataP),   	// decimal, scaled and averaged
+    	.in2(scaled_adc_dataP),  	// raw 12-bit ADC hexadecimal
+    	.select(select),
+    	.mux_out(mux_outP),
+    	.decimal_point(decimal_ptP)
+    	
 	);
  
 	// Seven Segment Display Subsystem
@@ -85,27 +98,38 @@ module lab_6_top_level (
     	.AN1(AN1), .AN2(AN2), .AN3(AN3), .AN4(AN4)
 	);
     
-	logic triangle_en;
-	assign triangle_en = pwm_enable | r2r_enable;
+	
+
 	// Instantiate the triangle_generator module
-	triangle_generator #(
-    	.WIDTH(8),       	// Bit width for duty_cycle (e.g. 8)
-    	.CLOCK_FREQ(100_000_000), // System clock frequency in Hz (e.g. 100_000_000)
-    	.WAVE_FREQ(1.0)	// Desired triangle wave frequency in Hz (e.g. 1.0)
-	) triangle_pwm_inst (
-    	.clk(clk),       	// Connect to system clock
-    	.reset(reset),   	// Connect to system reset
-    	.enable(triangle_en), // Connect to enable signal
-    	.pwm_out(pwm_out_internal), // Connect to PWM output signal
-    	.R2R_out(R2R_out_internal)  // Connect to R2R ladder header, can leave empty if
-	);                          	// not required, i.e. .R2R_out()
+// Instantiate the sawtooth_generator module
+    sawtooth_generator #(
+        .WIDTH(8),                 // Bit width for duty_cycle (e.g. 8)
+        .CLOCK_FREQ(100_000_000),  // System clock frequency in Hz (e.g. 100_000_000)
+        .WAVE_FREQ(1.0)            // Desired sawtooth wave frequency in Hz (e.g. 1.0)
+    ) SAWTOOTH_PWM (
+        .clk(clk),                 // Connect to system clock
+        .reset(reset),             // Connect to system reset
+        .enable(pwm_enable),      // Connect to enable signal
+        .pwm_out(pwm_out) // Connect to PWM output signal
+          
+    );
 
+    ramp_adc_processing #(
+        .SCALING_FACTOR(79993),                 // Bit width for duty_cycle (e.g. 8)
+        .SHIFT_FACTOR(19)  // System clock frequency in Hz (e.g. 100_000_000)
+    ) RAMP_ADC_PROCESSING (
+        .clk(clk),                 // Connect to system clock
+        .reset(reset),            // Connect to system reset
+        .enable(pwm_enable),      // Connect to enable signal
+        .pwm_V_out(pwm_V_out), // Connect to PWM output signal
+        .ave_data(ave_dataP),
+        .data(dataP),
+        .scaled_adc_data(scaled_adc_dataP)   
+    );
+ 
 
-	// Output multiplexing based on FSM state
-	always_comb begin
-    	pwm_out = pwm_enable ? pwm_out_internal : 0;
-    	R2R_out = r2r_enable ? R2R_out_internal : '0;
-	end
     
 endmodule
+
+
 
