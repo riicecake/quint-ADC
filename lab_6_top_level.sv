@@ -74,7 +74,7 @@ module lab_6_top_level (
 	);
 	
 	
-	mux4_8_bitsP MUX_P (
+	mux3_8_bitsP MUX_P (
     	.in0(dataP), // hexadecimal, scaled and averaged
     	.in1(ave_dataP),   	// decimal, scaled and averaged
     	.in2(scaled_adc_dataP),  	// raw 12-bit ADC hexadecimal
