@@ -6,15 +6,16 @@ module ramp_adc_processing #(
     input  logic   clk,
     input  logic   reset,
 
-    input  logic   pwm_V_out,
-    input  logic   enable,
-    output logic [15:0] ave_data,     // Averaged ADC data
+    
+    input  logic   duty_data,
+    
     output logic [7:0] data,         // Direct ADC data output from pwm_ADC_out
+    output logic [15:0] ave_data,     // Averaged ADC data
     output logic [15:0] scaled_adc_data // Scaled ADC data
 );
 
     // Internal signal declarations
-    logic ready_r, ready_pulse;                // Pulse signal for averaging
+    logic ready_r, ready_pulse, duty_data1;                // Pulse signal for averaging
     logic [15:0] scaled_adc_data_pipe; // Intermediate register for scaled data
     
     localparam int SCALING_FACTOR_WIDTH = $clog2(SCALING_FACTOR) + 1;
@@ -45,32 +46,24 @@ module ramp_adc_processing #(
         .reset(reset),
         .clk(clk),
         .EN(ready_pulse),
-        .Din(data),
+        .Din(duty_data1),
         .Q(ave_data)
     );
     
 
     
-    duty_cycle_generator #(
-        .WIDTH(8),
-        .CLOCK_FREQ(100_000_000),
-        .WAVE_FREQ()
-    ) duty_cycle_inst (
-        .clk(clk),
-        .reset(reset),
-        .enable(enable),
-        .pwm_out(data),
-        .pwm_V_out(pwm_V_out)
-    );
+
     
   // Scaling calculation using RTL multiplier
     always_ff @(posedge clk) begin
         if (reset) begin
+            data <= 0;
             scaled_adc_data <= 0;
             scaled_adc_data_temp <= 0;
             scaled_adc_data_pipe <= 0;
         end
         else if (ready_pulse) begin
+            data <= duty_data;
             scaled_adc_data_temp <= ave_data * SCALING_FACTOR;            // Use a wider temp register to avoid 32-bit overflow error
             scaled_adc_data_pipe <= scaled_adc_data_temp >> SHIFT_FACTOR; // Shift right by 19 after the multiplication
             scaled_adc_data      <= scaled_adc_data_pipe; 

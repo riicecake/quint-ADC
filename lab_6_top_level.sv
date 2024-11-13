@@ -14,16 +14,16 @@ module lab_6_top_level (
 );
 	// Internal signal declarations
 	logic [15:0] ave_data, data, scaled_adc_data; // Combined module outputs
-	logic [7:0] ave_dataP, dataP, scaled_adc_dataP;
+	logic [7:0]  duty_out, ave_dataP, dataP, scaled_adc_dataP;
 	logic [15:0] bcd_value, mux_out, mux_outP, mux_outX;
-	logic pwm_enable, r2r_enable, xadc_enable;
+	
 	logic pwm_out_internal, pwm_V_out_internal;
 	logic [7:0] R2R_out_internal;
     
 
     
 	// Combined ADC and processing module instance
-	adc_combined ADC_COMBINED (
+	xadc_processing XADC_PROCESSING (
     	.clk(clk),
     	.reset(reset),
     	.vauxp15(vauxp15),
@@ -102,15 +102,16 @@ module lab_6_top_level (
 
 	// Instantiate the triangle_generator module
 // Instantiate the sawtooth_generator module
-    sawtooth_generator #(
+    sawtooth_pwm #(
         .WIDTH(8),                 // Bit width for duty_cycle (e.g. 8)
         .CLOCK_FREQ(100_000_000),  // System clock frequency in Hz (e.g. 100_000_000)
         .WAVE_FREQ(1.0)            // Desired sawtooth wave frequency in Hz (e.g. 1.0)
     ) SAWTOOTH_PWM (
         .clk(clk),                 // Connect to system clock
         .reset(reset),             // Connect to system reset
-        .enable(pwm_enable),      // Connect to enable signal
-        .pwm_out(pwm_out) // Connect to PWM output signal
+        .pwm_V_out(pwm_V_out),
+        .pwm_out(pwm_out), // Connect to PWM output signal
+        .duty_out(duty_out)
           
     );
 
@@ -120,8 +121,7 @@ module lab_6_top_level (
     ) RAMP_ADC_PROCESSING (
         .clk(clk),                 // Connect to system clock
         .reset(reset),            // Connect to system reset
-        .enable(pwm_enable),      // Connect to enable signal
-        .pwm_V_out(pwm_V_out), // Connect to PWM output signal
+        .duty_data(duty_out),    
         .ave_data(ave_dataP),
         .data(dataP),
         .scaled_adc_data(scaled_adc_dataP)   
@@ -130,6 +130,5 @@ module lab_6_top_level (
 
     
 endmodule
-
 
 
