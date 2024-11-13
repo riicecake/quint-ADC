@@ -1,0 +1,31 @@
+module mux3_8_bitsP(
+    input  logic [7:0] in0,  
+    input  logic [7:0] in1,  
+    input  logic [7:0] in2,   
+    input  logic  [1:0] select,  
+   
+    output logic [15:0] mux_out,
+    output logic [3:0] decimal_point  
+);
+
+    always_comb begin
+            case(select)
+                2'b00: mux_out = in0;  
+                2'b01: mux_out = in1;  
+                2'b10: mux_out = in2;
+                default: mux_out = 8'h00;  // Default case: output all zeros
+            endcase
+    end    
+
+    always_comb begin
+
+            case(select)
+                2'b00: decimal_point = 4'b0000;  // Option for in0
+                2'b01: decimal_point = 4'b0010;  // Option for in1
+                2'b10: decimal_point = 4'b0000;  // Option for in2
+                2'b11: decimal_point = 4'b0000;  // Option for in3
+                default: decimal_point = 4'b0000;  // Default case: all zeros
+            endcase
+    end    
+
+endmodule
