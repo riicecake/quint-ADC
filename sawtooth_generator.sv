@@ -47,6 +47,7 @@ module sawtooth_pwm
     always_ff @(posedge clk) begin
         if (reset) begin
             duty_cycle <= 0;    // Initialize duty_cycle to 0 on reset
+            duty_out <= 0;
         end 
         else if (zero) begin
                 if (duty_cycle == MAX_DUTY_CYCLE) begin
