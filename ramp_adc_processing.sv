@@ -15,7 +15,7 @@ module ramp_adc_processing #(
 );
 
     // Internal signal declarations
-    logic ready_r, ready_pulse, duty_data1;                // Pulse signal for averaging
+    logic ready_r, ready_pulse;                // Pulse signal for averaging
     logic [15:0] scaled_adc_data_pipe; // Intermediate register for scaled data
     
     localparam int SCALING_FACTOR_WIDTH = $clog2(SCALING_FACTOR) + 1;
@@ -46,7 +46,7 @@ module ramp_adc_processing #(
         .reset(reset),
         .clk(clk),
         .EN(ready_pulse),
-        .Din(duty_data1),
+        .Din(duty_data),
         .Q(ave_data)
     );
     
