@@ -1,5 +1,5 @@
 module adc_combined #(
-    parameter int SCALING_FACTOR = 79993,
+    parameter int SCALING_FACTOR = 27208,
     parameter int SHIFT_FACTOR   = 19
 ) (
     input  logic   clk,

@@ -1,7 +1,7 @@
 Copyright 1986-2022 Xilinx, Inc. All Rights Reserved. Copyright 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 | Tool Version              : Vivado v.2024.1.2 (win64) Build 5164865 Thu Sep  5 14:37:11 MDT 2024
-| Date                      : Thu Nov  7 08:53:16 2024
+| Date                      : Wed Nov 13 22:07:30 2024
 | Host                      : DESKTOP-GTUF0U5 running 64-bit major release  (build 9200)
 | Command                   : report_io -file lab_6_top_level_io_placed.rpt
 | Design                    : lab_6_top_level
@@ -25,7 +25,7 @@ Table of Contents
 +---------------+
 | Total User IO |
 +---------------+
-|            46 |
+|            45 |
 +---------------+
 
 
@@ -151,7 +151,7 @@ Table of Contents
 | J19        |                   | High Range | IO_L6N_T0_D08_VREF_14        | User IO       |             |      14 |            |      |                     |                      |         |            |           |          |      |                  |              |                   |              |
 | K1         |                   | High Range | VCCO_35                      | VCCO          |             |      35 |            |      |                     |                      |    3.30 |            |           |          |      |                  |              |                   |              |
 | K2         | R2R_out[5]        | High Range | IO_L5P_T0_AD13P_35           | OUTPUT        | LVCMOS33    |      35 |         12 | SLOW |                     |            FP_VTT_50 |         | FIXED      |           |          |      | NONE             |              |                   |              |
-| K3         | buzzer_out        | High Range | IO_L7N_T1_AD6N_35            | OUTPUT        | LVCMOS33    |      35 |         12 | SLOW |                     |            FP_VTT_50 |         | FIXED      |           |          |      | NONE             |              |                   |              |
+| K3         |                   | High Range | IO_L7N_T1_AD6N_35            | User IO       |             |      35 |            |      |                     |                      |         |            |           |          |      |                  |              |                   |              |
 | K7         |                   | High Range | VCCO_35                      | VCCO          |             |      35 |            |      |                     |                      |    3.30 |            |           |          |      |                  |              |                   |              |
 | K8         |                   |            | GND                          | GND           |             |         |            |      |                     |                      |     0.0 |            |           |          |      |                  |              |                   |              |
 | K12        |                   | High Range | VCCO_14                      | VCCO          |             |      14 |            |      |                     |                      |    3.30 |            |           |          |      |                  |              |                   |              |

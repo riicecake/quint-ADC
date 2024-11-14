@@ -108,7 +108,8 @@ set rc [catch {
   create_msg_db init_design.pb
   set_param chipscope.maxJobs 1
   set_param checkpoint.writeSynthRtdsInDcp 1
-  set_param synth.incrementalSynthesisCache C:/Users/User/AppData/Roaming/Xilinx/Vivado/.Xil/Vivado-11524-DESKTOP-GTUF0U5/incrSyn
+  set_param synth.incrementalSynthesisCache C:/Users/User/AppData/Roaming/Xilinx/Vivado/.Xil/Vivado-2840-DESKTOP-GTUF0U5/incrSyn
+  set_param xicom.use_bs_reader 1
   set_param runs.launchOptions { -jobs 2  }
 OPTRACE "create in-memory project" START { }
   create_project -in_memory -part xc7a35tcpg236-1
@@ -123,7 +124,7 @@ OPTRACE "set parameters" START { }
 OPTRACE "set parameters" END { }
 OPTRACE "add files" START { }
   add_files -quiet C:/Users/User/453Labs/453_final/453_final.runs/synth_1/lab_6_top_level.dcp
-  read_ip -quiet c:/Users/User/453Labs/453_final/453_final.srcs/sources_1/ip/xadc_wiz_0/xadc_wiz_0.xci
+  read_ip -quiet C:/Users/User/453Labs/453_final/453_final.srcs/sources_1/ip/xadc_wiz_0/xadc_wiz_0.xci
 OPTRACE "read constraints: implementation" START { }
   read_xdc C:/Users/User/453Labs/453_final/Basys3_Lab_6.xdc
 OPTRACE "read constraints: implementation" END { }

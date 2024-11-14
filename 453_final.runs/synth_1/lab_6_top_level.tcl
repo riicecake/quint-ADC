@@ -56,8 +56,10 @@ if {$::dispatch::connected} {
 }
 
 OPTRACE "synth_1" START { ROLLUP_AUTO }
+set_param chipscope.maxJobs 1
 set_param checkpoint.writeSynthRtdsInDcp 1
-set_param synth.incrementalSynthesisCache C:/Users/User/AppData/Roaming/Xilinx/Vivado/.Xil/Vivado-11524-DESKTOP-GTUF0U5/incrSyn
+set_param synth.incrementalSynthesisCache C:/Users/User/AppData/Roaming/Xilinx/Vivado/.Xil/Vivado-2840-DESKTOP-GTUF0U5/incrSyn
+set_param xicom.use_bs_reader 1
 set_msg_config -id {Synth 8-256} -limit 10000
 set_msg_config -id {Synth 8-638} -limit 10000
 OPTRACE "Creating in-memory project" START { }
@@ -76,10 +78,9 @@ set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
 read_verilog -library xil_defaultlib -sv {
-  C:/Users/User/453Labs/453_final/adc_processing.sv
+  C:/Users/User/453Labs/453_final/adc_combined.sv
   C:/Users/User/453Labs/453_final/averager.sv
   C:/Users/User/453Labs/453_final/bin_to_bcd.sv
-  C:/Users/User/453Labs/453_final/buzzer_pwm.sv
   C:/Users/User/453Labs/453_final/digit_multiplexor.sv
   C:/Users/User/453Labs/453_final/downcounter.sv
   C:/Users/User/453Labs/453_final/mux4_16_bits.sv
@@ -91,7 +92,7 @@ read_verilog -library xil_defaultlib -sv {
   C:/Users/User/453Labs/453_final/triangle_waveform.sv
   C:/Users/User/453Labs/453_final/lab_6_top_level.sv
 }
-read_ip -quiet c:/Users/User/453Labs/453_final/453_final.srcs/sources_1/ip/xadc_wiz_0/xadc_wiz_0.xci
+read_ip -quiet C:/Users/User/453Labs/453_final/453_final.srcs/sources_1/ip/xadc_wiz_0/xadc_wiz_0.xci
 set_property used_in_implementation false [get_files -all c:/Users/User/453Labs/453_final/453_final.gen/sources_1/ip/xadc_wiz_0/xadc_wiz_0_ooc.xdc]
 set_property used_in_implementation false [get_files -all c:/Users/User/453Labs/453_final/453_final.gen/sources_1/ip/xadc_wiz_0/xadc_wiz_0.xdc]
 
@@ -108,6 +109,8 @@ read_xdc C:/Users/User/453Labs/453_final/Basys3_Lab_6.xdc
 set_property used_in_implementation false [get_files C:/Users/User/453Labs/453_final/Basys3_Lab_6.xdc]
 
 set_param ips.enableIPCacheLiteLoad 1
+
+read_checkpoint -auto_incremental -incremental C:/Users/User/453Labs/453_final/453_final.srcs/utils_1/imports/synth_1/lab_6_top_level.dcp
 close [open __synthesis_is_running__ w]
 
 OPTRACE "synth_design" START { }
