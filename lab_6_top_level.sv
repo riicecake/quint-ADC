@@ -5,7 +5,7 @@ module lab_6_top_level (
 	input  logic [1:0] mux_display_select,
 	input      	vauxp15, // Analog input (positive)
 	input      	vauxn15, // Analog input (negative)
-	input       pwm_V_out,
+	input  logic  pwm_V_out,
 	output logic   CA, CB, CC, CD, CE, CF, CG, DP,
 	output logic   AN1, AN2, AN3, AN4,
 	output logic [15:0] led,
@@ -15,7 +15,7 @@ module lab_6_top_level (
 	// Internal signal declarations
 	logic [15:0] ave_data, data, scaled_adc_data; // Combined module outputs
 	logic [7:0]  duty_out, ave_dataP, dataP, scaled_adc_dataP;
-	logic [15:0] bcd_value, mux_out, mux_outP, mux_outX;
+	logic [15:0] bcd_value, bcd_valueP, mux_out, mux_outP, mux_outX;
 	
 	logic pwm_out_internal, pwm_V_out_internal;
 	logic [7:0] R2R_out_internal;
@@ -36,14 +36,21 @@ module lab_6_top_level (
 	// Connect scaled ADC data to LEDs, make LEDs' brightness pulse with pwm_out
 	assign led = pwm_out_internal ? scaled_adc_data : '0;
 
-	bin_to_bcd BIN2BCD (
+	bin_to_bcd BIN2BCDX (
     	.clk(	clk),
     	.reset(  reset),
     	.bin_in( scaled_adc_data),
     	.bcd_out(bcd_value)
 	);
 	
-    logic [3:0] decimal_pt, decimal_ptP, decimal_pt1;
+	bin_to_bcd BIN2BCDP (
+    	.clk(	clk),
+    	.reset(  reset),
+    	.bin_in( scaled_adc_dataP),
+    	.bcd_out(bcd_valueP)
+	);
+	
+    logic [3:0] decimal_pt, decimal_ptP, decimal_ptX;
     mux3_16_bits MUX_DISPLAY (
     	.in0(mux_outX), // hexadecimal, scaled and averaged
     	.in1(mux_outP),   	// decimal, scaled and averaged
@@ -53,23 +60,16 @@ module lab_6_top_level (
     	.mux_out(mux_out)
 	);
     
-    mux3_16_bits MUX_DECIMAL (
-    	.in0(decimal_pt1), // hexadecimal, scaled and averaged
-    	.in1(decimal_ptP),   	// decimal, scaled and averaged
-    	.in2(),  	// raw 12-bit ADC hexadecimal
-    	
-    	.select(mux_display_select),
-    	.mux_out(decimal_pt)
-	);
+
 	
 	mux4_16_bitsX MUX_X (
     	.in0(data[15:4]), // hexadecimal, scaled and averaged
     	.in1(ave_data),   	// decimal, scaled and averaged
-    	.in2(scaled_adc_data),  	// raw 12-bit ADC hexadecimal
-    	.in3(bcd_value),   	// averaged and before scaling 16-bit ADC (extra 4-bits from averaging) hexadecimal
+    	.in2(bcd_value),  	// raw 12-bit ADC hexadecimal
+    	.in3(scaled_adc_data),   	// averaged and before scaling 16-bit ADC (extra 4-bits from averaging) hexadecimal
     	.select(select),
     	.mux_out(mux_outX),
-    	.decimal_point(decimal_pt1)
+    	.decimal_point(decimal_pt)
     	
 	);
 	
@@ -77,7 +77,7 @@ module lab_6_top_level (
 	mux3_8_bitsP MUX_P (
     	.in0(dataP), // hexadecimal, scaled and averaged
     	.in1(ave_dataP),   	// decimal, scaled and averaged
-    	.in2(scaled_adc_dataP),  	// raw 12-bit ADC hexadecimal
+    	.in2(bcd_valueP),  	// raw 12-bit ADC hexadecimal
     	.select(select),
     	.mux_out(mux_outP),
     	.decimal_point(decimal_ptP)
@@ -105,7 +105,7 @@ module lab_6_top_level (
     sawtooth_pwm #(
         .WIDTH(8),                 // Bit width for duty_cycle (e.g. 8)
         .CLOCK_FREQ(100_000_000),  // System clock frequency in Hz (e.g. 100_000_000)
-        .WAVE_FREQ(1.0)            // Desired sawtooth wave frequency in Hz (e.g. 1.0)
+        .WAVE_FREQ(1000)            // Desired sawtooth wave frequency in Hz (e.g. 1.0)
     ) SAWTOOTH_PWM (
         .clk(clk),                 // Connect to system clock
         .reset(reset),             // Connect to system reset
@@ -116,7 +116,7 @@ module lab_6_top_level (
     );
 
     ramp_adc_processing #(
-        .SCALING_FACTOR(79993),                 // Bit width for duty_cycle (e.g. 8)
+        .SCALING_FACTOR(26406),                 // Bit width for duty_cycle (e.g. 8)
         .SHIFT_FACTOR(19)  // System clock frequency in Hz (e.g. 100_000_000)
     ) RAMP_ADC_PROCESSING (
         .clk(clk),                 // Connect to system clock
@@ -127,6 +127,11 @@ module lab_6_top_level (
         .scaled_adc_data(scaled_adc_dataP)   
     );
  
+
+    
+endmodule
+
+
 
     
 endmodule
