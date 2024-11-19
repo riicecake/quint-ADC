@@ -1,5 +1,5 @@
 module ramp_adc_processing #(
-    parameter int SCALING_FACTOR = 79993,
+    parameter int SCALING_FACTOR = 26406,
     parameter int SHIFT_FACTOR   = 19
 
 ) (
@@ -51,9 +51,6 @@ module ramp_adc_processing #(
     );
     
 
-    
-
-    
   // Scaling calculation using RTL multiplier
     always_ff @(posedge clk) begin
         if (reset) begin
