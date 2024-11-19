@@ -1,9 +1,8 @@
 module downcounter #(
-    parameter int PERIOD = 1000  // Number to count down from, must be positive
+    parameter int PERIOD = 392  // Number to count down from, must be positive
 ) (
     input  logic clk,    // Clock input
     input  logic reset,  // Active-high reset
-    input  logic enable, // Active-high enable
     output logic zero    // Pulses high for one clock cycle when counter reaches zero
 );
 
@@ -16,7 +15,7 @@ module downcounter #(
         if (reset) begin
             count <= PERIOD - 1;
             zero  <= 0;
-        end else if (enable) begin
+        end else begin
             if (count == 0) begin
                 count <= PERIOD - 1;
                 zero  <= 1;
@@ -24,8 +23,7 @@ module downcounter #(
                 count <= count - 1;
                 zero  <= 0;
             end
-        end else
-            zero <= 0;
+        end
     end
 
 endmodule
