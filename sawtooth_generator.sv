@@ -5,16 +5,19 @@ module sawtooth_pwm
     #(
         parameter int WIDTH = 8,                   // Bit width for duty_cycle
         parameter int CLOCK_FREQ = 100_000_000,    // System clock frequency in Hz
-        parameter real WAVE_FREQ = 1.0             // Desired sawtooth wave frequency in Hz
+        parameter real WAVE_FREQ = 1000.0             // Desired sawtooth wave frequency in Hz
     )
     (
         input  logic clk,      // System clock (100 MHz)
         input  logic reset,    // Active-high reset
         input  logic pwm_V_out,
+        
         output logic pwm_out,  // PWM output signal
         output logic duty_out
         
     );
+    
+    logic pwm_V_out1;
 
     // Calculate maximum duty cycle value based on WIDTH
     localparam int MAX_DUTY_CYCLE = (2 ** WIDTH) - 1;  // 255 for WIDTH = 8
@@ -39,7 +42,7 @@ module sawtooth_pwm
     ) downcounter_inst (
         .clk(clk),
         .reset(reset),
-        .enable(enable),  // Use the enable input
+         
         .zero(zero)       // Pulses high every DOWNCOUNTER_PERIOD clock cycles
     );
 
@@ -53,16 +56,18 @@ module sawtooth_pwm
                 if (duty_cycle == MAX_DUTY_CYCLE) begin
                     duty_cycle <= 0; // Reset to 0 after reaching maximum duty cycle
                 end 
-                else if (~pwm_V_out) begin
-                    duty_out <= duty_cycle;
-                end
                 else begin
                     duty_cycle <= duty_cycle + 1; // Increment duty_cycle
+                    pwm_V_out1 <= pwm_V_out;
+                    if (~pwm_V_out && pwm_V_out1) begin
+                        duty_out <= duty_cycle;
+                    end
+                        
                     
                 end
              
              end
- 
+            
         end
 
     // Instantiate PWM module
@@ -71,7 +76,6 @@ module sawtooth_pwm
     ) pwm_inst (
         .clk(clk),
         .reset(reset),
-        .enable(enable),    // Use the enable input
         .duty_cycle(duty_cycle),
         .pwm_out(pwm_out)   // Output PWM signal
     );
